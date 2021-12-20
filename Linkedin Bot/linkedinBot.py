@@ -21,13 +21,7 @@ def get_session_cookies(username,password):
 	login_url = "https://www.linkedin.com/login"
 	driver.get(login_url)
 	actions = ActionChains(driver)
-	actions.send_keys(username)
-	actions.send_keys(Keys.TAB)
-	actions.send_keys(password)
-	actions.send_keys(Keys.TAB)
-	actions.send_keys(Keys.TAB)
-	actions.send_keys(Keys.TAB)
-	actions.send_keys(Keys.ENTER)
+	actions.send_keys(username).send_keys(Keys.TAB).send_keys(password).send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.TAB).send_keys(Keys.ENTER)
 	actions.perform()
 
 
