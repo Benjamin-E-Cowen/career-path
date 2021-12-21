@@ -1,0 +1,106 @@
+<html>
+	<head>
+
+
+		<script src="../js/cytoscape.js-unstable/dist/cytoscape.min.js"></script>
+
+		<style>
+			#cy 
+			{
+  				width: 100%;
+  				height: 100%;
+  				display: block;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="cy"> </div>
+	</body>
+
+
+	<script>
+		var cy = cytoscape({
+			container: document.getElementById('cy'),
+
+
+			 style: cytoscape.stylesheet()
+			    .selector('node')
+			      .css({
+			        'height': 80,
+			        'width': 80,
+			        'background-fit': 'cover',
+			        'border-color': '#000',
+			        'border-width': 3,
+			        'border-opacity': 0.5
+			      })
+			    .selector('.eating')
+			      .css({
+			        'border-color': 'blue',
+			        'border-opacity': 1
+			      })
+			    .selector('.eater')
+			      .css({
+			        'border-width': 9
+			      })
+			    .selector('edge')
+			      .css({
+			        'curve-style': 'bezier',
+			        'width': 6,
+			        'target-arrow-shape': 'triangle',
+			        'line-color': 'blue',
+			        'target-arrow-color': 'blue'
+			      })
+			    .selector('#cardea')
+      				.css(
+      					{ 
+      						'background-image': 'https://media-exp1.licdn.com/dms/image/C4E0BAQHU8MtPzGUgJA/company-logo_100_100/0/1639046327621?e=1648080000&v=beta&t=xhaFNUiboPDmJl_Qw0mpuCGHejKtFPrwdcYM-IAjE8k',
+      						'height': 200,
+			        		'width': 200,
+      					}
+      			),
+
+
+
+
+
+
+			elements: 
+			{
+			    nodes: 
+			    [
+			      { data: { id: 'cardea' } },
+			      { data: { id: 'bird' } },
+			      { data: { id: 'ladybug' } },
+			      { data: { id: 'aphid' } },
+			      { data: { id: 'rose' } },
+			      { data: { id: 'grasshopper' } },
+			      { data: { id: 'plant' } },
+			      { data: { id: 'wheat' } }
+			    ],
+			    edges: 
+			    [
+			      { data: { source: 'cardea', target: 'bird' } },
+			      { data: { source: 'bird', target: 'ladybug' } },
+			      { data: { source: 'bird', target: 'grasshopper' } },
+			      { data: { source: 'grasshopper', target: 'plant' } },
+			      { data: { source: 'grasshopper', target: 'wheat' } },
+			      { data: { source: 'ladybug', target: 'aphid' } },
+			      { data: { source: 'aphid', target: 'rose' } }
+			    ]
+  			},
+
+  			layout: {
+    			name: 'breadthfirst',
+    			directed: true,
+    			padding: 10
+  			}
+
+
+		});
+	</script>
+
+
+
+	
+</html>
