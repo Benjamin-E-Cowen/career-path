@@ -67,7 +67,11 @@ def get_users_matching_criteria_url(past_job=[],current_job=[], education=[]):
 		actions = ActionChains(driver)
 		actions.send_keys(job).pause(3).send_keys(Keys.DOWN).send_keys(Keys.ENTER).pause(3)
 		actions.perform()
+	url = driver.current_url
 	find_elements_by_inner_text("Show results")[0].click()
+	while driver.current_url == url:
+		pass 
+	
 	return driver.current_url
 
 
