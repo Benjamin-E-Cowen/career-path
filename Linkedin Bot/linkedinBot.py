@@ -5,6 +5,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
+import re
+import json
 
 
 
@@ -56,8 +58,10 @@ def get_user_job_history(username):
 
 def get_users_matching_criteria_url(past_job=[],current_job=[], education=[],name=""):
 	print("Determining search critera url")
+	url_c = driver.current_url
 	driver.get("https://www.linkedin.com/search/results/people/?origin=SWITCH_SEARCH_VERTICAL&sid=9~1")
-
+	while driver.current_url == url_c:
+		pass 
 	find_elements_by_inner_text("All filters")[0].click()
 	for edu in education:
 		print("adding education", edu)
@@ -109,24 +113,58 @@ def get_users_matching_criteria_url(past_job=[],current_job=[], education=[],nam
 
 
 
+
+
 cookies = get_session_cookies(username, password)
 people_links = get_users_matching_criteria_url(education=["UCLA"], past_job=["Facebook"], name="John")
 
 job_descriptions  = []
 all_companies = {}
-
+company_counts = {}
 people_jobs = []
 
 for people_link in people_links:
 	driver.get(people_link)
 	soup = BeautifulSoup(driver.page_source, "html.parser")
-	occupations = soup.find_all("ul", class_='pv-profile-section__section-info section-info pv-profile-section__section-info--has-no-more')
-	job_descriptions += [t.text for t in occupations[0].find_all("h3",class_='t-16 t-black t-bold')]
-	companies = [j.text.split("\n")[1].replace(" ","") for j in occupations[0].find_all("p",class_='pv-entity__secondary-title t-14 t-black t-normal')]
-	for company in companies:
-		if company not in all_companies:
-			pass
-	people_jobs += [companies[-1]]
+
+	exp_index = soup.text.index("Experience")
+	edu_index = soup.text.index("Education")
+	occupations_images_temp = list(map(lambda img: img.get('src', 'QWERTY'), soup.find_all("img")))
+	occupations_temp = list(map(lambda img: img.get('alt', 'QWERTY').replace("logo","").strip(), soup.find_all("img")))
+	occupations = []
+	occupations_images = []
+	for idx in range(len(occupations_temp)):
+		try:
+			if any(exp_index < img_index < edu_index for img_index in [m.start() for m in re.finditer(occupations_temp[idx], soup.text)]) and occupations_temp[idx]:
+				occupations.append(occupations_temp[idx])
+				occupations_images.append(occupations_images_temp[idx])
+		except:
+			pass 
+
+
+
+	for company, company_image in zip(occupations, occupations_images):
+		all_companies[company] = company_image
+		company_counts[company] = company_counts.get(company, 0) + 1
+	people_jobs += [occupations]
+
+
+
+saved_info = {}
+saved_info['career_paths'] = people_jobs
+saved_info['companies_images'] = all_companies
+saved_info['companies_counts'] = company_counts
+
+
+
+output = "data =" +  f" '{json.dumps(saved_info)}' "
+with open('../Back End/data.json', 'w') as f:
+    f.write(output)
+
+
+
+
+
 
 
 
