@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import re
 import json
-
+import time
 
 
 
@@ -63,6 +63,7 @@ def get_users_matching_criteria_url(past_job=[],current_job=[], education=[],nam
 	while driver.current_url == url_c:
 		pass 
 	find_elements_by_inner_text("All filters")[0].click()
+	time.sleep(1)
 	for edu in education:
 		print("adding education", edu)
 		find_elements_by_inner_text("Add a school")[0].click()
@@ -116,7 +117,7 @@ def get_users_matching_criteria_url(past_job=[],current_job=[], education=[],nam
 
 
 cookies = get_session_cookies(username, password)
-people_links = get_users_matching_criteria_url(education=["UCLA"], past_job=["Facebook"], name="John")
+people_links = get_users_matching_criteria_url(education=["UC Berkeley"], past_job=["Google"], name="John")
 
 job_descriptions  = []
 all_companies = {}
@@ -124,20 +125,22 @@ company_counts = {}
 people_jobs = []
 
 for people_link in people_links:
+	url = people_link
 	driver.get(people_link)
+	while driver.current_url == url:
+		pass
+	url = driver.current_url + "details/experience/"
+	time.sleep(5)
+	driver.get(url)
 	soup = BeautifulSoup(driver.page_source, "html.parser")
-
-	exp_index = soup.text.index("Experience")
-	edu_index = soup.text.index("Education")
-	occupations_images_temp = list(map(lambda img: img.get('src', 'QWERTY'), soup.find_all("img")))
-	occupations_temp = list(map(lambda img: img.get('alt', 'QWERTY').replace("logo","").strip(), soup.find_all("img")))
+	occupations_images_temp = list(map(lambda img: img.get('src', 'QWERTY').strip(), filter(lambda img: img.get('width',0) == '48',soup.find_all("img"))))
+	occupations_temp = list(map(lambda img: img.get('alt', 'QWERTY').replace("logo","").strip(), filter(lambda img: img.get('width',0) == '48',soup.find_all("img"))))
 	occupations = []
 	occupations_images = []
 	for idx in range(len(occupations_temp)):
 		try:
-			if any(exp_index < img_index < edu_index for img_index in [m.start() for m in re.finditer(occupations_temp[idx], soup.text)]) and occupations_temp[idx]:
-				occupations.append(occupations_temp[idx])
-				occupations_images.append(occupations_images_temp[idx])
+			occupations.append(occupations_temp[idx])
+			occupations_images.append(occupations_images_temp[idx])
 		except:
 			pass 
 
@@ -146,7 +149,19 @@ for people_link in people_links:
 	for company, company_image in zip(occupations, occupations_images):
 		all_companies[company] = company_image
 		company_counts[company] = company_counts.get(company, 0) + 1
-	people_jobs += [occupations]
+	people_jobs += [occupations[::-1]]
+
+# EXAMPLE
+# JD = [A, B, C ,D]
+# CT = [B, D, E]
+# career_paths = [[A,B,C,D], [B,D,E]]
+# companies_images{A: company_A_Logo, B: company_B_logo, ...}
+# company_counts[ A: 1, B: 2, C: 1, D: 2, E: 1]
+
+
+
+
+
 
 
 
@@ -164,6 +179,22 @@ with open('../Back End/data.json', 'w') as f:
 
 
 
+# from seleniumwire import webdriver
+
+# # import gzip
+# # data = gzip.decompress(response.read())
+# # text = data.decode('utf-8')
+
+
+# url = "URL_OF_API_WE_WANT_TO_COMMUNICATE_WITH"
+# driver.requests:
+
+# #need requests
+# r = requests.get(request.url, headers=request.headers)
+
+
+# #get id
+# facebook_query_return_as_json['data']['elements'][0]['image']['attributes'][0]['*miniCompany'].split(":")[-1]
 
 
 
